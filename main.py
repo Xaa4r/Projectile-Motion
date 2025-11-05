@@ -7,9 +7,9 @@ from datetime import datetime
 import sys
 import random
 
-# -----------------------
+
 # Constants & Defaults
-# -----------------------
+
 pygame.init()
 CLOCK = pygame.time.Clock()
 FPS = 60
@@ -42,17 +42,17 @@ TRAJECTORY_COLORS = [
 # Base UI design resolution for scaling
 BASE_W, BASE_H = 1600, 900
 
-# -----------------------
+
 # Utility / Helpers
-# -----------------------
+
 def clamp(v, a, b): return max(a, min(b, v))
 
 def gen_color():
     return random.choice(TRAJECTORY_COLORS)
 
-# -----------------------
+
 # Projectile model
-# -----------------------
+
 class Projectile:
     def __init__(self, angle_deg, speed, mass, y0, air_resistance=True, color=None):
         self.angle = math.radians(angle_deg)
@@ -79,8 +79,7 @@ class Projectile:
 
         self.color = color if color else gen_color()
 
-        # estimate area assuming sphere density ~ 1000 kg/m^3 (we used in earlier code)
-        # but keep consistent: volume = mass / 1000 -> radius
+
         try:
             volume = self.mass / 1000.0
             if volume <= 0:
@@ -108,7 +107,7 @@ class Projectile:
             ax = 0.0
             ay = -G_EARTH
 
-        # Euler integration (sufficient for this sim), can be improved with RK4 if desired
+        # Euler integration
         self.vx += ax * dt
         self.vy += ay * dt
         self.x += self.vx * dt
@@ -143,9 +142,9 @@ class Projectile:
             # keep final point at y = 0
             self.trajectory[-1] = (t_land, x_land, 0.0)
 
-# -----------------------
-# UI Widgets (simple)
-# -----------------------
+
+# UI Widgets 
+
 class TextField:
     def __init__(self, label, text, font, rect, scale):
         self.label = label
@@ -259,7 +258,7 @@ class Toggle:
 
     def handle_event(self, ev):
         if ev.type == pygame.MOUSEBUTTONDOWN:
-            # toggle if clicked inside whole area (rect)
+            # toggle if clicked inside whole area 
             if self.rect.collidepoint(ev.pos):
                 self.on = not self.on
                 return True
@@ -269,9 +268,9 @@ class Toggle:
         self.rect = pygame.Rect(rect)
         self.scale = scale
 
-# -----------------------
+
 # Main App
-# -----------------------
+
 class ProjectileApp:
     def __init__(self, width, height):
         self.width = width
@@ -280,10 +279,10 @@ class ProjectileApp:
         pygame.display.set_caption("Projectile Motion")
         self.scale = self.width / BASE_W
 
-        # fonts (we'll recreate on resize)
+        # fonts 
         self.create_fonts()
 
-        # UI elements (positions created by layout())
+        # UI elements 
         self.angle_field = None
         self.speed_field = None
         self.mass_field = None
@@ -298,22 +297,22 @@ class ProjectileApp:
         self.is_playing = True  # whether stepping simulation
         self.selected_index = None  # index of selected projectile for info highlight
 
-        # layout and initial UI creation
+        
         self.layout()
 
     def create_fonts(self):
-        # recreate fonts based on current scale (integer sizes)
+        
         self.font = pygame.font.Font(None, max(16, int(20 * self.scale)))
         self.title_font = pygame.font.Font(None, max(24, int(40 * self.scale)))
         self.mono = pygame.font.SysFont('Consolas', max(14, int(16 * self.scale)))
         self.small = pygame.font.Font(None, max(12, int(16 * self.scale)))
 
     def layout(self):
-        # recalc scale and positions
+       
         self.scale = self.width / BASE_W
         self.create_fonts()
 
-        # left panel dims (controls)
+       
         panel_w = int(320 * self.scale)
         panel_x = int(30 * self.scale)
         panel_y = int(80 * self.scale)
@@ -428,7 +427,7 @@ class ProjectileApp:
             if self.export_btn.handle_event(ev):
                 self.export_csv()
 
-            # selection: clicking on a trajectory point or list area (simple heuristic)
+            # selection: clicking on a trajectory point 
             if ev.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = ev.pos
                 if self.graph_rect.collidepoint((mx, my)):
@@ -453,10 +452,6 @@ class ProjectileApp:
         if self.is_playing:
             for p in self.projectiles:
                 if not p.landed:
-                    # do a number of internal small steps per frame so simulation speed is stable across FPS
-                    # step count scaled so the simulation uses real dt pacing
-                    # here we advance until frame_time approximated: we do one step per p.dt per frame update
-                    # but simplest: advance fixed number of steps (e.g., 2)
                     p.step()
 
         # decrease message timer
