@@ -489,7 +489,7 @@ class ProjectileApp:
         self.screen.fill(BG)
 
         # title
-        title = self.title_font.render("Projectile Motion", True, TEXT)
+        title = self.title_font.render("Projectile Motion by https://github.com/Xaa4r", True, TEXT)
         self.screen.blit(title, (int(30 * self.scale), int(20 * self.scale)))
 
         # left panel
